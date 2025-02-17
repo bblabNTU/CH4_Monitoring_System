@@ -3,20 +3,23 @@ version: "3"
 services:
   mosquitto:
     image: eclipse-mosquitto:latest
-    container_name: mosquitto
-    restart: always
+    container_name: mosquitto-TLRI
+    restart: unless-stopped
     ports:
-      - "1883:1883"
+      - "18883:1883"
       - "9001:9001"
     networks:
       - iot
     volumes:
-      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      # - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto:/mosquitto
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
   
   influxdb:
-    image: influxdb
-    container_name: influxdb
-    restart: always
+    image: influxdb:latest
+    container_name: influxdb-TLRI
+    restart: unless-stopped
     ports:
       - "8086:8086"
     networks:
@@ -27,15 +30,15 @@ services:
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=user
-      - DOCKER_INFLUXDB_INIT_PASSWORD=password1234
-      - DOCKER_INFLUXDB_INIT_ORG=some_org
-      - DOCKER_INFLUXDB_INIT_BUCKET=some_data
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=4eYvsu8wZCJ6tKuE2sxvFHkvYFwSMVK0011hEEiojvejzpSaij86vYQomN_12au6eK-2MZ6Knr-Sax201y70w==
+      - DOCKER_INFLUXDB_INIT_PASSWORD=nxxxxxxxx5
+      - DOCKER_INFLUXDB_INIT_ORG=bblab
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensor_data
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=P1111111RbQQPadd5I0YA7HR1j_eFLdHpLBOMFPJMxjhyk5myZ-3Uaa4p5b5aUVLnOOxaMJtmc-IpfWYZTuyFA==
   
   telegraf:
     image: telegraf
-    container_name: telegraf
-    restart: always
+    container_name: telegraf-TLRI
+    restart: unless-stopped
     volumes:
       - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
     depends_on:
@@ -46,15 +49,25 @@ services:
   
   grafana:
     image: grafana/grafana
-    container_name: grafana
-    restart: always
+    container_name: grafana-TLRI
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
       - iot
     volumes:
       - ./grafana-provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=smtp.gmail.com
+      - GF_SMTP_USER=admin
+      - GF_SMTP_PASSWORD=admin
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_INSTALL_PLUGINS=gapit-htmlgraphics-panel
     depends_on:
       - influxdb
 
