@@ -162,4 +162,4 @@ datasources:
 
 ### Grafana dashboard (TO BE UPDATED...)
 Default Grafana dashboard is also set up in this directory: `grafana-provisioning/dashboards`
-
+### TODO: Fix: Upload local data that is collected offline. (Probably using a background thread to upload those data when the device is reconnected to the internet)
